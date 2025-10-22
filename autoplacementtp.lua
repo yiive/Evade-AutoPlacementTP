@@ -16,14 +16,14 @@ local Teleports = {}
 local guiVisible = true
 local wasMinimized = false
 local fullSize = UDim2.new(0, 270, 0, 430)
-local minimizedSize = UDim2.new(0, 270, 0, 45) -- Tinggi Header saja
+local minimizedSize = UDim2.new(0, 270, 0, 45) 
 
 -- === GUI Construction ===
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TeleportGui"
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false -- FIX: GUI tidak hilang saat respawn
+ScreenGui.ResetOnSpawn = false 
 
 local Frame = Instance.new("Frame")
 Frame.Name = "MainFrame"
@@ -33,13 +33,13 @@ Frame.BackgroundColor3 = Color3.fromRGB(20, 24, 35)
 Frame.BorderSizePixel = 0
 Frame.Active = true
 Frame.Parent = ScreenGui
-Frame.ClipsDescendants = true -- Digunakan untuk memotong konten saat minimize
+Frame.ClipsDescendants = true
 
 local UICornerMain = Instance.new("UICorner")
 UICornerMain.CornerRadius = UDim.new(0, 10)
 UICornerMain.Parent = Frame
 
--- Header Frame (Digunakan untuk Dragging)
+-- Header Frame
 local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, 0, 0, 45)
