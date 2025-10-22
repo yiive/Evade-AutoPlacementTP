@@ -1,4 +1,4 @@
---// AutoPlacement TP - Yiv //--
+--// AutoPlace TP - Yiv //--
 
 -- Service Setup
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -38,7 +38,7 @@ HeaderCorner.CornerRadius = UDim.new(0, 10)
 HeaderCorner.Parent = Header
 
 local HeaderLabel = Instance.new("TextLabel")
-HeaderLabel.Text = "AutoPlacement TP - Yiv"
+HeaderLabel.Text = "AutoPlacement TP - "
 HeaderLabel.Font = Enum.Font.GothamBold
 HeaderLabel.TextSize = 17
 HeaderLabel.TextColor3 = Color3.new(1, 1, 1)
