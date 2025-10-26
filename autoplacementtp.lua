@@ -1,5 +1,4 @@
---// AutoPlace TP - Yiv //--
--- Final GUI Version + Mode Akurat & Normal pakai Raycast + Toggle Key "T"
+--// AutoPlace TP - Yiv //-- 
 
 -- Service Setup
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -85,8 +84,8 @@ UIListLayout.Padding = UDim.new(0, 5)
 
 -- Bottom Buttons
 local BottomFrame = Instance.new("Frame")
-BottomFrame.Size = UDim2.new(1, -20, 0, 90)
-BottomFrame.Position = UDim2.new(0, 10, 1, -100)
+BottomFrame.Size = UDim2.new(1, -20, 0, 130)
+BottomFrame.Position = UDim2.new(0, 10, 1, -140)
 BottomFrame.BackgroundTransparency = 1
 BottomFrame.Parent = Frame
 
@@ -114,8 +113,6 @@ ClearButton.TextSize = 14
 ClearButton.TextColor3 = Color3.new(1, 1, 1)
 ClearButton.BorderSizePixel = 0
 ClearButton.TextWrapped = true
-ClearButton.TextXAlignment = Enum.TextXAlignment.Center
-ClearButton.TextYAlignment = Enum.TextYAlignment.Center
 ClearButton.Parent = BottomFrame
 Instance.new("UICorner", ClearButton).CornerRadius = UDim.new(0, 8)
 
@@ -129,11 +126,21 @@ ModeButton.Font = Enum.Font.GothamBold
 ModeButton.TextSize = 14
 ModeButton.TextColor3 = Color3.new(1, 1, 1)
 ModeButton.BorderSizePixel = 0
-ModeButton.TextWrapped = true
-ModeButton.TextXAlignment = Enum.TextXAlignment.Center
-ModeButton.TextYAlignment = Enum.TextYAlignment.Center
 ModeButton.Parent = BottomFrame
 Instance.new("UICorner", ModeButton).CornerRadius = UDim.new(0, 8)
+
+-- Copy & Place Button
+local CopyButton = Instance.new("TextButton")
+CopyButton.Size = UDim2.new(1, 0, 0, 35)
+CopyButton.Position = UDim2.new(0, 0, 0, 85)
+CopyButton.BackgroundColor3 = Color3.fromRGB(85, 120, 200)
+CopyButton.Text = "Copy & Place Terakhir"
+CopyButton.Font = Enum.Font.GothamBold
+CopyButton.TextSize = 14
+CopyButton.TextColor3 = Color3.new(1, 1, 1)
+CopyButton.BorderSizePixel = 0
+CopyButton.Parent = BottomFrame
+Instance.new("UICorner", CopyButton).CornerRadius = UDim.new(0, 8)
 
 -- Dragging
 local dragging, dragStart, startPos
@@ -152,26 +159,26 @@ end)
 Header.InputChanged:Connect(function(input)
 	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
 		local delta = input.Position - dragStart
-		Frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-			startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		Frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 	end
 end)
 
 -- Teleport Logic
 local Teleports = {}
 local AccurateMode = false
+local LastPlacedCFrame = nil -- Menyimpan titik terakhir
 
 -- Raycast helper
 local function getGroundBelow(position)
 	local rayOrigin = position + Vector3.new(0, 5, 0)
-	local rayDirection = Vector3.new(0, -50, 0)
+	local rayDirection = Vector3.new(0, -100, 0)
 	local raycastParams = RaycastParams.new()
 	raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
 	raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 	return Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
 end
 
--- ✅ Mode Normal pakai raycast (fix floating)
+-- Mode Normal: Raycast dari badan
 local function getGroundCFrameAbovePosition(position, rotation)
 	local result = getGroundBelow(position)
 	if result then
@@ -181,14 +188,16 @@ local function getGroundCFrameAbovePosition(position, rotation)
 	end
 end
 
--- ✅ Mode Akurat (fix grounded)
+-- Mode Akurat: Raycast dari kaki
 local function getAccurateFootPositionCFrame(rootPart)
 	local character = LocalPlayer.Character
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
 	local offset = humanoid and humanoid.RigType == Enum.HumanoidRigType.R6 and 2.5 or 2.8
+
 	local pos = rootPart.Position - Vector3.new(0, offset, 0)
 	local rot = select(2, rootPart.CFrame:ToEulerAnglesYXZ())
 	local result = getGroundBelow(pos)
+
 	if result then
 		return CFrame.new(result.Position) * CFrame.Angles(0, rot, 0)
 	else
@@ -196,11 +205,13 @@ local function getAccurateFootPositionCFrame(rootPart)
 	end
 end
 
+-- Fire event
 local function attemptPlaceTeleport(cframe)
 	local args = { [1] = 1, [2] = { [1] = "Teleporter", [2] = cframe } }
 	pcall(function() ToolActionEvent:FireServer(unpack(args)) end)
 end
 
+-- Buat tombol teleport
 local function createTeleportButton(name, cframe)
 	local btn = Instance.new("TextButton")
 	btn.Size = UDim2.new(1, 0, 0, 39)
@@ -218,7 +229,10 @@ local function createTeleportButton(name, cframe)
 
 	btn.MouseEnter:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(95, 150, 255) end)
 	btn.MouseLeave:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(50, 55, 75) end)
-	btn.MouseButton1Click:Connect(function() attemptPlaceTeleport(cframe) end)
+	btn.MouseButton1Click:Connect(function()
+		attemptPlaceTeleport(cframe)
+		LastPlacedCFrame = cframe
+	end)
 end
 
 local function refreshTeleportButtons()
@@ -231,7 +245,7 @@ local function refreshTeleportButtons()
 	ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, #Teleports * 44)
 end
 
--- Buttons
+-- Tombol utama
 AddButton.MouseButton1Click:Connect(function()
 	local character = LocalPlayer.Character
 	if character and character:FindFirstChild("HumanoidRootPart") then
@@ -266,6 +280,14 @@ ModeButton.MouseButton1Click:Connect(function()
 	end
 end)
 
+CopyButton.MouseButton1Click:Connect(function()
+	if LastPlacedCFrame then
+		attemptPlaceTeleport(LastPlacedCFrame)
+	else
+		warn("❗ Belum ada teleport terakhir yang disalin!")
+	end
+end)
+
 -- Smooth minimize
 local minimized = false
 local tweenInfo = TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
@@ -294,7 +316,7 @@ CloseButton.MouseButton1Click:Connect(function()
 	ScreenGui:Destroy()
 end)
 
--- 🔥 Toggle Visibility with Key "T"
+-- Toggle GUI dengan T
 local guiVisible = true
 UIS.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
