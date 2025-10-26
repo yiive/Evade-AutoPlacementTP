@@ -1,5 +1,5 @@
---// AutoPlace TP - Yiv //-- 
--- Final GUI Version
+--// AutoPlace TP - Yiv //--
+-- Final GUI Version + Mode Akurat & Normal pakai Raycast + Toggle Key "T"
 
 -- Service Setup
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -8,6 +8,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
 
 -- GUI Setup
 local ScreenGui = Instance.new("ScreenGui")
@@ -23,10 +24,7 @@ Frame.BorderSizePixel = 0
 Frame.Active = true
 Frame.ClipsDescendants = true
 Frame.Parent = ScreenGui
-
-local UICornerMain = Instance.new("UICorner")
-UICornerMain.CornerRadius = UDim.new(0, 10)
-UICornerMain.Parent = Frame
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
 
 -- Header
 local Header = Instance.new("Frame")
@@ -34,10 +32,7 @@ Header.Size = UDim2.new(1, 0, 0, 45)
 Header.BackgroundColor3 = Color3.fromRGB(35, 40, 60)
 Header.BorderSizePixel = 0
 Header.Parent = Frame
-
-local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0, 10)
-HeaderCorner.Parent = Header
+Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
 
 local HeaderLabel = Instance.new("TextLabel")
 HeaderLabel.Text = " Yiv "
@@ -50,7 +45,7 @@ HeaderLabel.Position = UDim2.new(0, 12, 0, 0)
 HeaderLabel.TextXAlignment = Enum.TextXAlignment.Left
 HeaderLabel.Parent = Header
 
--- Minimize Button
+-- Buttons
 local MinimizeButton = Instance.new("TextButton")
 MinimizeButton.Size = UDim2.new(0, 28, 0, 28)
 MinimizeButton.Position = UDim2.new(1, -78, 0, 8)
@@ -63,7 +58,6 @@ MinimizeButton.BorderSizePixel = 0
 MinimizeButton.Parent = Header
 Instance.new("UICorner", MinimizeButton).CornerRadius = UDim.new(0, 5)
 
--- Close Button
 local CloseButton = Instance.new("TextButton")
 CloseButton.Size = UDim2.new(0, 28, 0, 28)
 CloseButton.Position = UDim2.new(1, -42, 0, 8)
@@ -78,13 +72,12 @@ Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 5)
 
 -- Scroll
 local ScrollFrame = Instance.new("ScrollingFrame")
-ScrollFrame.Size = UDim2.new(1, -20, 1, -150)
+ScrollFrame.Size = UDim2.new(1, -20, 1, -200)
 ScrollFrame.Position = UDim2.new(0, 10, 0, 55)
 ScrollFrame.BackgroundTransparency = 1
 ScrollFrame.ScrollBarThickness = 8
 ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 ScrollFrame.Parent = Frame
-
 local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.Parent = ScrollFrame
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -92,14 +85,13 @@ UIListLayout.Padding = UDim.new(0, 5)
 
 -- Bottom Buttons
 local BottomFrame = Instance.new("Frame")
-BottomFrame.Size = UDim2.new(1, -20, 0, 60)
-BottomFrame.Position = UDim2.new(0, 10, 1, -70)
+BottomFrame.Size = UDim2.new(1, -20, 0, 90)
+BottomFrame.Position = UDim2.new(0, 10, 1, -100)
 BottomFrame.BackgroundTransparency = 1
 BottomFrame.Parent = Frame
 
 local AddButton = Instance.new("TextButton")
-AddButton.Size = UDim2.new(0.48, 0, 1, 0)
-AddButton.Position = UDim2.new(0, 0, 0, 0)
+AddButton.Size = UDim2.new(0.48, 0, 0, 40)
 AddButton.BackgroundColor3 = Color3.fromRGB(70, 145, 255)
 AddButton.Text = "Tambah Koordinat"
 AddButton.Font = Enum.Font.GothamBold
@@ -107,11 +99,13 @@ AddButton.TextSize = 14
 AddButton.TextColor3 = Color3.new(1, 1, 1)
 AddButton.BorderSizePixel = 0
 AddButton.TextWrapped = true
+AddButton.TextXAlignment = Enum.TextXAlignment.Center
+AddButton.TextYAlignment = Enum.TextYAlignment.Center
 AddButton.Parent = BottomFrame
 Instance.new("UICorner", AddButton).CornerRadius = UDim.new(0, 8)
 
 local ClearButton = Instance.new("TextButton")
-ClearButton.Size = UDim2.new(0.48, 0, 1, 0)
+ClearButton.Size = UDim2.new(0.48, 0, 0, 40)
 ClearButton.Position = UDim2.new(0.52, 0, 0, 0)
 ClearButton.BackgroundColor3 = Color3.fromRGB(230, 85, 85)
 ClearButton.Text = "Clear Semua"
@@ -120,10 +114,28 @@ ClearButton.TextSize = 14
 ClearButton.TextColor3 = Color3.new(1, 1, 1)
 ClearButton.BorderSizePixel = 0
 ClearButton.TextWrapped = true
+ClearButton.TextXAlignment = Enum.TextXAlignment.Center
+ClearButton.TextYAlignment = Enum.TextYAlignment.Center
 ClearButton.Parent = BottomFrame
 Instance.new("UICorner", ClearButton).CornerRadius = UDim.new(0, 8)
 
--- Dragging System
+-- Mode Button
+local ModeButton = Instance.new("TextButton")
+ModeButton.Size = UDim2.new(1, 0, 0, 35)
+ModeButton.Position = UDim2.new(0, 0, 0, 45)
+ModeButton.BackgroundColor3 = Color3.fromRGB(60, 65, 90)
+ModeButton.Text = "Mode: Normal"
+ModeButton.Font = Enum.Font.GothamBold
+ModeButton.TextSize = 14
+ModeButton.TextColor3 = Color3.new(1, 1, 1)
+ModeButton.BorderSizePixel = 0
+ModeButton.TextWrapped = true
+ModeButton.TextXAlignment = Enum.TextXAlignment.Center
+ModeButton.TextYAlignment = Enum.TextYAlignment.Center
+ModeButton.Parent = BottomFrame
+Instance.new("UICorner", ModeButton).CornerRadius = UDim.new(0, 8)
+
+-- Dragging
 local dragging, dragStart, startPos
 Header.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -147,18 +159,40 @@ end)
 
 -- Teleport Logic
 local Teleports = {}
+local AccurateMode = false
 
-local function getGroundCFrameAbovePosition(position, rotation)
-	local rayOrigin = position + Vector3.new(0, 70, 0)
-	local rayDirection = Vector3.new(0, -140, 0)
+-- Raycast helper
+local function getGroundBelow(position)
+	local rayOrigin = position + Vector3.new(0, 5, 0)
+	local rayDirection = Vector3.new(0, -50, 0)
 	local raycastParams = RaycastParams.new()
 	raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
 	raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-	local result = Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+	return Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+end
+
+-- ✅ Mode Normal pakai raycast (fix floating)
+local function getGroundCFrameAbovePosition(position, rotation)
+	local result = getGroundBelow(position)
 	if result then
-		return CFrame.new(result.Position) * CFrame.Angles(0, rotation, 0)
+		return CFrame.new(result.Position + Vector3.new(0, 0.0, 0)) * CFrame.Angles(0, rotation, 0)
 	else
 		return CFrame.new(position) * CFrame.Angles(0, rotation, 0)
+	end
+end
+
+-- ✅ Mode Akurat (fix grounded)
+local function getAccurateFootPositionCFrame(rootPart)
+	local character = LocalPlayer.Character
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	local offset = humanoid and humanoid.RigType == Enum.HumanoidRigType.R6 and 2.5 or 2.8
+	local pos = rootPart.Position - Vector3.new(0, offset, 0)
+	local rot = select(2, rootPart.CFrame:ToEulerAnglesYXZ())
+	local result = getGroundBelow(pos)
+	if result then
+		return CFrame.new(result.Position) * CFrame.Angles(0, rot, 0)
+	else
+		return CFrame.new(pos) * CFrame.Angles(0, rot, 0)
 	end
 end
 
@@ -178,14 +212,13 @@ local function createTeleportButton(name, cframe)
 	btn.BorderSizePixel = 0
 	btn.Parent = ScrollFrame
 	btn.TextWrapped = true
+	btn.TextXAlignment = Enum.TextXAlignment.Center
+	btn.TextYAlignment = Enum.TextYAlignment.Center
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
 
 	btn.MouseEnter:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(95, 150, 255) end)
 	btn.MouseLeave:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(50, 55, 75) end)
-
-	btn.MouseButton1Click:Connect(function()
-		attemptPlaceTeleport(cframe)
-	end)
+	btn.MouseButton1Click:Connect(function() attemptPlaceTeleport(cframe) end)
 end
 
 local function refreshTeleportButtons()
@@ -198,15 +231,21 @@ local function refreshTeleportButtons()
 	ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, #Teleports * 44)
 end
 
+-- Buttons
 AddButton.MouseButton1Click:Connect(function()
 	local character = LocalPlayer.Character
 	if character and character:FindFirstChild("HumanoidRootPart") then
-		local rootPart = character.HumanoidRootPart
-		local pos = rootPart.Position
-		local rot = select(2, rootPart.CFrame:ToEulerAnglesYXZ())
-		local correctedCFrame = getGroundCFrameAbovePosition(pos, rot)
+		local root = character.HumanoidRootPart
+		local cframe
+		if AccurateMode then
+			cframe = getAccurateFootPositionCFrame(root)
+		else
+			local pos = root.Position
+			local rot = select(2, root.CFrame:ToEulerAnglesYXZ())
+			cframe = getGroundCFrameAbovePosition(pos, rot)
+		end
 		local tpName = "Teleport " .. tostring(#Teleports + 1)
-		table.insert(Teleports, { name = tpName, cframe = correctedCFrame })
+		table.insert(Teleports, { name = tpName, cframe = cframe })
 		refreshTeleportButtons()
 	end
 end)
@@ -216,7 +255,18 @@ ClearButton.MouseButton1Click:Connect(function()
 	refreshTeleportButtons()
 end)
 
--- Close & Smooth Minimize
+ModeButton.MouseButton1Click:Connect(function()
+	AccurateMode = not AccurateMode
+	if AccurateMode then
+		ModeButton.Text = "Mode: Akurat"
+		ModeButton.BackgroundColor3 = Color3.fromRGB(70, 200, 100)
+	else
+		ModeButton.Text = "Mode: Normal"
+		ModeButton.BackgroundColor3 = Color3.fromRGB(60, 65, 90)
+	end
+end)
+
+-- Smooth minimize
 local minimized = false
 local tweenInfo = TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 local fullSize = UDim2.new(0, 270, 0, 430)
@@ -225,17 +275,13 @@ local miniSize = UDim2.new(0, 270, 0, 45)
 MinimizeButton.MouseButton1Click:Connect(function()
 	if not minimized then
 		for _, child in pairs(Frame:GetChildren()) do
-			if child ~= Header and not child:IsA("UICorner") and not child:IsA("UIStroke") then
-				child.Visible = false
-			end
+			if child ~= Header and not child:IsA("UICorner") then child.Visible = false end
 		end
 		TweenService:Create(Frame, tweenInfo, {Size = miniSize}):Play()
 		minimized = true
 	else
 		for _, child in pairs(Frame:GetChildren()) do
-			if child ~= Header and not child:IsA("UICorner") and not child:IsA("UIStroke") then
-				child.Visible = true
-			end
+			if child ~= Header and not child:IsA("UICorner") then child.Visible = true end
 		end
 		TweenService:Create(Frame, tweenInfo, {Size = fullSize}):Play()
 		minimized = false
@@ -246,6 +292,16 @@ CloseButton.MouseButton1Click:Connect(function()
 	TweenService:Create(Frame, TweenInfo.new(0.25), {BackgroundTransparency = 1}):Play()
 	task.wait(0.25)
 	ScreenGui:Destroy()
+end)
+
+-- 🔥 Toggle Visibility with Key "T"
+local guiVisible = true
+UIS.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == Enum.KeyCode.T then
+		guiVisible = not guiVisible
+		ScreenGui.Enabled = guiVisible
+	end
 end)
 
 refreshTeleportButtons()
